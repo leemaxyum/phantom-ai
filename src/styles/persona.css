@@ -1,0 +1,162 @@
+/* ===========================
+   PHANTOM AI DESIGN SYSTEM
+=========================== */
+
+.ph-card{
+    position:relative;
+    background:rgba(15,15,15,.82);
+    backdrop-filter:blur(12px);
+    border:3px solid white;
+    box-shadow:
+        0 12px 40px rgba(0,0,0,.55),
+        0 0 35px rgba(255,0,0,.18);
+    overflow:hidden;
+}
+
+.ph-card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+    linear-gradient(
+    135deg,
+    rgba(255,255,255,.06),
+    transparent 45%);
+    pointer-events:none;
+}
+
+.ph-skew{
+    transform:skew(-8deg);
+}
+
+.ph-unskew{
+    transform:skew(8deg);
+}
+
+.ph-red{
+    background:#d51017;
+}
+
+.ph-button{
+    border:3px solid white;
+    background:#cf1018;
+    color:white;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    transition:.18s;
+    cursor:pointer;
+    box-shadow:
+    8px 8px 0px black;
+}
+
+.ph-button:hover{
+
+    transform:
+    translateY(-3px)
+    scale(1.03)
+    rotate(-1deg);
+
+    box-shadow:
+    12px 12px 0px black;
+}
+
+.ph-button:active{
+
+transform:scale(.97);
+
+}
+
+.ph-outline{
+
+border:3px solid white;
+
+}
+
+.ph-title{
+
+font-size:48px;
+
+font-weight:900;
+
+letter-spacing:.08em;
+
+text-transform:uppercase;
+
+line-height:.9;
+
+}
+
+.ph-shadow{
+
+text-shadow:
+
+4px 4px 0px black;
+
+}
+
+.ph-panel{
+
+background:rgba(20,20,20,.88);
+
+border:2px solid white;
+
+backdrop-filter:blur(10px);
+
+box-shadow:
+
+0 8px 30px rgba(0,0,0,.45);
+
+}
+
+.ph-hover{
+
+transition:.2s;
+
+}
+
+.ph-hover:hover{
+
+transform:translateX(8px);
+
+}
+
+.ph-scroll::-webkit-scrollbar{
+
+width:8px;
+
+}
+
+.ph-scroll::-webkit-scrollbar-thumb{
+
+background:#d51017;
+
+border-radius:20px;
+
+}
+
+.persona-cut{
+
+clip-path:polygon(
+0 0,
+92% 0,
+100% 18%,
+100% 100%,
+7% 100%,
+0 82%
+);
+
+}
+
+.persona-cut-right{
+
+clip-path:polygon(
+0 18%,
+8% 0,
+100% 0,
+100% 82%,
+92% 100%,
+0 100%
+);
+
+}
