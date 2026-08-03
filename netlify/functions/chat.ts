@@ -29,7 +29,7 @@ export const handler: Handler = async (event) => {
   try {
     const body: ChatRequestBody = JSON.parse(event.body || "{}");
 
-    const apiKey = process.env.GROQ_API_KEY ?? "";
+    const apiKey = body.apiKey?.trim() || process.env.GROQ_API_KEY || "";
 
     const chunks: string[] = [];
 

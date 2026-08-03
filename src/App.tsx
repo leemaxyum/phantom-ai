@@ -8,17 +8,31 @@ import { Particles } from './components/Particles'
 import { LoadingScreen } from './components/LoadingScreen'
 import { ToastContainer } from './components/Toast'
 import { CursorGlow } from './components/CursorGlow'
+import { AwakeningScreen } from './components/AwakeningScreen'
+import { hasApiKey, API_KEY_CHANGE_EVENT } from './services/gemini'
 
 const ChatPage = lazy(() =>
   import('./pages/ChatPage').then((m) => ({ default: m.ChatPage })),
 )
 
 function App() {
-  const [loading, setLoading] = useState(true)
+  const [apiKeyPresent, setApiKeyPresent] = useState(() => hasApiKey())
+  const [loading, setLoading] = useState(apiKeyPresent)
 
+  // Only run the loading sequence once a key is present — either it was
+  // already there on launch, or the user just completed the Awakening.
   useEffect(() => {
+    if (!apiKeyPresent) return
+
+    setLoading(true)
     const timer = setTimeout(() => setLoading(false), 1500)
     return () => clearTimeout(timer)
+  }, [apiKeyPresent])
+
+  useEffect(() => {
+    const handleApiKeyChange = () => setApiKeyPresent(hasApiKey())
+    window.addEventListener(API_KEY_CHANGE_EVENT, handleApiKeyChange)
+    return () => window.removeEventListener(API_KEY_CHANGE_EVENT, handleApiKeyChange)
   }, [])
 
   return (
@@ -30,16 +44,22 @@ function App() {
             <Particles />
             <CursorGlow />
 
-            <AnimatePresence>
-              {loading && <LoadingScreen key="loading" />}
-            </AnimatePresence>
+            {!apiKeyPresent && <AwakeningScreen />}
 
-            {!loading && (
-              <Suspense fallback={<LoadingScreen />}>
-                <div className="relative z-10 h-full">
-                  <ChatPage />
-                </div>
-              </Suspense>
+            {apiKeyPresent && (
+              <>
+                <AnimatePresence>
+                  {loading && <LoadingScreen key="loading" />}
+                </AnimatePresence>
+
+                {!loading && (
+                  <Suspense fallback={<LoadingScreen />}>
+                    <div className="relative z-10 h-full">
+                      <ChatPage />
+                    </div>
+                  </Suspense>
+                )}
+              </>
             )}
 
             <ToastContainer />

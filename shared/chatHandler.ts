@@ -9,6 +9,7 @@ export interface ChatMessage {
 export interface ChatRequestBody {
   messages: ChatMessage[];
   systemPrompt: string;
+  apiKey?: string;
 }
 
 function sendSse(res: ServerResponse, data: Record<string, string>) {

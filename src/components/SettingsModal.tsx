@@ -1,4 +1,4 @@
-import { memo, useEffect } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   FiX,
@@ -9,11 +9,14 @@ import {
   FiUpload,
   FiRotateCcw,
   FiTrash2,
+  FiKey,
+  FiEyeOff,
 } from 'react-icons/fi'
 import { useSettings } from '../context/SettingsContext'
 import { useChat } from '../context/ChatContext'
 import { useAvailableVoices } from '../hooks/useSpeech'
 import { audioService } from '../services/audioService'
+import { setStoredApiKey, clearStoredApiKey } from '../services/gemini'
 
 interface SettingsModalProps {
   open: boolean
@@ -91,8 +94,22 @@ function SettingsModalInner({ open, onClose }: SettingsModalProps) {
   const { exportAllChats, importAllChats, clearAllConversations } = useChat()
   const voices = useAvailableVoices()
 
+  const [replacingMask, setReplacingMask] = useState(false)
+  const [newMaskValue, setNewMaskValue] = useState('')
+  const [maskError, setMaskError] = useState('')
+  const [savingMask, setSavingMask] = useState(false)
+
   useEffect(() => {
     if (open) audioService.playSfx('modal')
+  }, [open])
+
+  useEffect(() => {
+    if (!open) {
+      setReplacingMask(false)
+      setNewMaskValue('')
+      setMaskError('')
+      setSavingMask(false)
+    }
   }, [open])
 
   const handleImport = () => {
@@ -104,6 +121,25 @@ function SettingsModalInner({ open, onClose }: SettingsModalProps) {
       if (file) importAllChats(file)
     }
     input.click()
+  }
+
+  const handleSaveNewMask = () => {
+    const trimmed = newMaskValue.trim()
+    if (!trimmed) {
+      setMaskError('A mask cannot be empty.')
+      return
+    }
+    setMaskError('')
+    setSavingMask(true)
+    setStoredApiKey(trimmed)
+    // phantom:apikey-changed event handles the rest; nothing else to do here.
+  }
+
+  const handleForgetMask = () => {
+    audioService.playSfx('click')
+    clearStoredApiKey()
+    // phantom:apikey-changed event system takes it from here — App.tsx will
+    // swap back to AwakeningScreen automatically, unmounting this modal.
   }
 
   return (
@@ -223,6 +259,60 @@ function SettingsModalInner({ open, onClose }: SettingsModalProps) {
                   onChange={(v) => updateSettings({ voiceVolume: v })}
                 />
               </div>
+            </section>
+
+            <section className="mb-6">
+              <div className="mb-3 flex items-center gap-2 text-sm font-medium text-red-400">
+                <FiKey size={14} /> Mask Management
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <ActionButton
+                  icon={FiKey}
+                  label="Replace Mask"
+                  onClick={() => {
+                    setReplacingMask((v) => !v)
+                    setMaskError('')
+                  }}
+                />
+                <ActionButton icon={FiEyeOff} label="Forget Mask" onClick={handleForgetMask} danger />
+              </div>
+
+              <AnimatePresence>
+                {replacingMask && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-3 overflow-hidden"
+                  >
+                    <input
+                      type="password"
+                      value={newMaskValue}
+                      onChange={(e) => {
+                        setNewMaskValue(e.target.value)
+                        if (maskError) setMaskError('')
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveNewMask()
+                      }}
+                      placeholder="New Groq API key"
+                      autoFocus
+                      disabled={savingMask}
+                      className="w-full rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-200 outline-none focus:border-red-800 disabled:opacity-60"
+                    />
+                    {maskError && <p className="mt-1 text-xs text-red-400">{maskError}</p>}
+                    <button
+                      type="button"
+                      onClick={handleSaveNewMask}
+                      disabled={savingMask}
+                      className="mt-2 w-full rounded-lg border border-red-900/40 bg-red-800/20 px-3 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-800/30 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {savingMask ? 'Saving…' : 'Save New Mask'}
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </section>
 
             <section className="mb-6">
