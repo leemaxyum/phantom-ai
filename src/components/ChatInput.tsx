@@ -42,10 +42,11 @@ function ChatInputInner({ onSend, isGenerating, disabled }: ChatInputProps) {
   }
 
   return (
-    <div className="relative border-t border-neutral-800/50 bg-black/40 p-4 backdrop-blur-md">
+    <div className="relative border-t-[3px] border-white bg-black/60 p-4 backdrop-blur-md">
       <motion.div
-        className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-neutral-800/60 bg-neutral-900/60 p-2 transition-shadow focus-within:border-red-900/50 focus-within:shadow-[0_0_20px_rgba(139,0,0,0.15)]"
-        whileHover={{ borderColor: 'rgba(139, 0, 0, 0.3)' }}
+        className="ph-panel mx-auto flex max-w-3xl items-end gap-2 border-2 border-white/50 p-2 transition-shadow focus-within:border-red-600 focus-within:shadow-[0_0_28px_rgba(213,16,23,0.35)]"
+        style={{ clipPath: 'polygon(0 0, 97% 0, 100% 25%, 100% 100%, 3% 100%, 0 75%)' }}
+        whileHover={{ borderColor: 'rgba(213, 16, 23, 0.5)' }}
       >
         <textarea
           ref={textareaRef}
@@ -61,15 +62,17 @@ function ChatInputInner({ onSend, isGenerating, disabled }: ChatInputProps) {
           type="button"
           onClick={handleSubmit}
           disabled={!value.trim() || isGenerating || disabled}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-900/80 text-white transition-colors hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-30"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className="flex h-9 w-9 shrink-0 items-center justify-center border-2 border-white bg-red-700 text-white shadow-[3px_3px_0px_black] transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-800 disabled:text-neutral-600 disabled:opacity-60 disabled:shadow-none"
+          style={{ clipPath: 'polygon(15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%, 0 15%)' }}
+          whileHover={{ scale: 1.08, rotate: -3, boxShadow: '5px 5px 0px black' }}
+          whileTap={{ scale: 0.92, rotate: 0 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 18 }}
           onMouseEnter={() => audioService.playSfx('hover')}
         >
           {isGenerating ? <FiSquare size={14} /> : <FiSend size={16} />}
         </motion.button>
       </motion.div>
-      <p className="mx-auto mt-2 max-w-3xl text-center text-[10px] text-neutral-600">
+      <p className="mx-auto mt-2 max-w-3xl text-center text-[10px] uppercase tracking-wide text-neutral-600">
         Phantom AI may make mistakes. Verify important information.
       </p>
     </div>

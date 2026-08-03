@@ -49,34 +49,47 @@ function ChatMessageInner({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3 }}
-      className={`group flex gap-3 px-4 py-3 ${isUser ? 'flex-row-reverse' : ''}`}
+      className={`group flex gap-3 px-4 py-3.5 ${isUser ? 'flex-row-reverse' : ''}`}
     >
-      <div
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-          isUser
-            ? 'bg-neutral-700 text-neutral-200'
-            : 'border border-red-800/40 bg-black/60 text-red-400'
-        }`}
-      >
-        {isUser ? 'You' : 'P'}
-      </div>
+      {isUser ? (
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-700 text-xs font-bold text-neutral-200">
+          You
+        </div>
+      ) : (
+        <motion.img
+          src="/icons/bubble.png"
+          alt="Phantom AI"
+          draggable={false}
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+          className="h-[52px] w-[52px] shrink-0 select-none object-contain"
+          style={{ userSelect: 'none' }}
+        />
+      )}
 
       <div className={`max-w-[75%] min-w-0 ${isUser ? 'text-right' : ''}`}>
         <div
-          className={`inline-block rounded-2xl px-4 py-2.5 text-left ${
+          className={`inline-block border-2 px-4 py-3 text-left backdrop-blur-md ${
             isUser
-              ? 'bg-neutral-800/80 text-neutral-100'
+              ? 'border-white/60 bg-neutral-800/70 text-neutral-100 shadow-[4px_4px_0px_black]'
               : message.isError
-                ? 'border border-red-900/50 bg-red-950/30 text-red-300'
-                : 'border border-neutral-800/50 bg-neutral-900/60 text-neutral-200 backdrop-blur-sm'
+                ? 'border-red-800 bg-red-950/40 text-red-300 shadow-[4px_4px_0px_black]'
+                : 'border-white/40 bg-neutral-900/50 text-neutral-200 shadow-[4px_4px_0px_rgba(0,0,0,0.6)]'
           } ${isStreaming ? 'animate-pulse' : ''}`}
+          style={{
+            clipPath: isUser
+              ? 'polygon(0 0, 100% 0, 100% 82%, 94% 100%, 0 100%)'
+              : 'polygon(6% 0, 100% 0, 100% 100%, 0 100%, 0 18%)',
+          }}
         >
           {editing ? (
             <div className="flex flex-col gap-2">
               <textarea
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="min-h-[80px] w-full resize-none rounded-lg border border-neutral-700 bg-neutral-900 p-2 text-sm text-white outline-none focus:border-red-800"
+                className="min-h-[80px] w-full resize-none border-2 border-neutral-700 bg-neutral-900 p-2 text-sm text-white outline-none focus:border-red-600"
                 autoFocus
               />
               <div className="flex justify-end gap-2">
@@ -106,7 +119,7 @@ function ChatMessageInner({
         </div>
 
         <div
-          className={`mt-1 flex items-center gap-1 ${isUser ? 'justify-end' : 'justify-start'}`}
+          className={`mt-1.5 flex items-center gap-1 ${isUser ? 'justify-end' : 'justify-start'}`}
         >
           <span className="text-[10px] text-neutral-600">
             {formatTimestamp(message.timestamp)}

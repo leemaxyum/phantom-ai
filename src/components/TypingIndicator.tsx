@@ -3,20 +3,29 @@ import { motion } from 'framer-motion'
 
 function TypingIndicatorInner() {
   return (
-    <div className="flex items-center gap-1 px-1 py-2">
-      {[0, 1, 2].map((i) => (
-        <motion.span
-          key={i}
-          className="inline-block h-2 w-2 rounded-full bg-red-500/70"
-          animate={{ opacity: [0.3, 1, 0.3], y: [0, -4, 0] }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            delay: i * 0.2,
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
+    <div className="flex items-center gap-2 px-1 py-2">
+      <img
+        src="/icons/bubble.png"
+        alt=""
+        draggable={false}
+        className="h-5 w-5 shrink-0 select-none object-contain"
+        style={{ userSelect: 'none' }}
+      />
+      <div className="flex items-center gap-1">
+        {[0, 1, 2].map((i) => (
+          <motion.span
+            key={i}
+            className="inline-block h-2 w-2 rounded-full bg-red-500/70"
+            animate={{ opacity: [0.3, 1, 0.3], y: [0, -4, 0] }}
+            transition={{
+              duration: 1,
+              repeat: Infinity,
+              delay: i * 0.2,
+              ease: 'easeInOut',
+            }}
+          />
+        ))}
+      </div>
     </div>
   )
 }

@@ -1,6 +1,5 @@
 import { memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiMessageCircle } from 'react-icons/fi'
 
 function EmptyChatInner() {
   return (
@@ -10,13 +9,16 @@ function EmptyChatInner() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <motion.div
+      <motion.img
+        src="/icons/bubble.png"
+        alt=""
+        draggable={false}
         animate={{ y: [0, -8, 0] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-      >
-        <FiMessageCircle size={48} className="text-red-900/40" />
-      </motion.div>
-      <h2 className="mt-4 text-lg font-medium text-neutral-300">
+        className="h-16 w-16 select-none object-contain"
+        style={{ userSelect: 'none' }}
+      />
+      <h2 className="mt-4 text-2xl font-semibold text-neutral-200">
         The stage is set
       </h2>
       <p className="mt-2 max-w-sm text-sm text-neutral-500">
