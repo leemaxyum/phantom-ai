@@ -9,6 +9,7 @@ import { LoadingScreen } from './components/LoadingScreen'
 import { ToastContainer } from './components/Toast'
 import { CursorGlow } from './components/CursorGlow'
 import { AwakeningScreen } from './components/AwakeningScreen'
+import { VideoOverlay } from './components/VideoOverlay'
 import { hasApiKey, API_KEY_CHANGE_EVENT } from './services/gemini'
 
 const ChatPage = lazy(() =>
@@ -18,6 +19,7 @@ const ChatPage = lazy(() =>
 function App() {
   const [apiKeyPresent, setApiKeyPresent] = useState(() => hasApiKey())
   const [loading, setLoading] = useState(apiKeyPresent)
+  const [easterEggOpen, setEasterEggOpen] = useState(false)
 
   // Only run the loading sequence once a key is present — either it was
   // already there on launch, or the user just completed the Awakening.
@@ -55,7 +57,7 @@ function App() {
                 {!loading && (
                   <Suspense fallback={<LoadingScreen />}>
                     <div className="relative z-10 h-full">
-                      <ChatPage />
+                      <ChatPage onSecretTrigger={() => setEasterEggOpen(true)} />
                     </div>
                   </Suspense>
                 )}
@@ -63,6 +65,8 @@ function App() {
             )}
 
             <ToastContainer />
+
+            <VideoOverlay open={easterEggOpen} onFinished={() => setEasterEggOpen(false)} />
           </div>
         </ChatProvider>
       </SettingsProvider>

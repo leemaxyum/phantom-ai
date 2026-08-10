@@ -12,7 +12,11 @@ import { WelcomeScreen } from '../components/WelcomeScreen'
 import { SettingsModal } from '../components/SettingsModal'
 import { ThinkingOverlay } from '../components/TypingIndicator'
 
-function ChatPageInner() {
+interface ChatPageProps {
+  onSecretTrigger?: () => void
+}
+
+function ChatPageInner({ onSecretTrigger }: ChatPageProps) {
   const {
     activeConversation,
     isGenerating,
@@ -52,7 +56,7 @@ function ChatPageInner() {
 
   return (
     <div className="relative flex h-full w-full">
-      <Sidebar onOpenSettings={() => setSettingsOpen(true)} />
+      <Sidebar onOpenSettings={() => setSettingsOpen(true)} onSecretTrigger={onSecretTrigger} />
 
       <main className="flex flex-1 flex-col overflow-hidden">
         {showWelcome && !hasMessages ? (

@@ -1,4 +1,4 @@
-import { memo, useState, useCallback } from 'react'
+import { memo, useState, useCallback, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   FiPlus,
@@ -16,9 +16,13 @@ import { formatTimestamp } from '../utils/helpers'
 
 interface SidebarProps {
   onOpenSettings: () => void
+  onSecretTrigger?: () => void
 }
 
-function SidebarInner({ onOpenSettings }: SidebarProps) {
+const EASTER_EGG_CLICK_TARGET = 7
+const EASTER_EGG_WINDOW_MS = 5000
+
+function SidebarInner({ onOpenSettings, onSecretTrigger }: SidebarProps) {
   const {
     filteredConversations,
     activeConversation,
@@ -33,6 +37,34 @@ function SidebarInner({ onOpenSettings }: SidebarProps) {
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [logoHovered, setLogoHovered] = useState(false)
+
+  // Easter-egg click tracking — isolated from all other sidebar state.
+  const logoClickCountRef = useRef(0)
+  const logoClickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (logoClickTimerRef.current) clearTimeout(logoClickTimerRef.current)
+    }
+  }, [])
+
+  const handleLogoClick = useCallback(() => {
+    logoClickCountRef.current += 1
+
+    if (logoClickTimerRef.current) {
+      clearTimeout(logoClickTimerRef.current)
+    }
+
+    if (logoClickCountRef.current >= EASTER_EGG_CLICK_TARGET) {
+      logoClickCountRef.current = 0
+      onSecretTrigger?.()
+      return
+    }
+
+    logoClickTimerRef.current = setTimeout(() => {
+      logoClickCountRef.current = 0
+    }, EASTER_EGG_WINDOW_MS)
+  }, [onSecretTrigger])
 
   const toggleSidebar = useCallback(() => {
     updateSettings({ sidebarOpen: !settings.sidebarOpen })
@@ -88,6 +120,7 @@ function SidebarInner({ onOpenSettings }: SidebarProps) {
                   style={{ cursor: 'pointer' }}
                   onHoverStart={() => setLogoHovered(true)}
                   onHoverEnd={() => setLogoHovered(false)}
+                  onClick={handleLogoClick}
                   initial={{ scale: 1, rotate: 0, x: 0, y: 0 }}
                   whileHover={{ scale: 1.32, rotate: -4, x: 10, y: -4 }}
                   whileTap={{ scale: 0.95, rotate: -1, x: 0, y: 0 }}
