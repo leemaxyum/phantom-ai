@@ -13,8 +13,9 @@ export interface ChatMessage {
 
 const CHAT_ENDPOINT = '/.netlify/functions/chat'
 
-/** localStorage key where the user's Groq API key ("mask") is kept. */
+/** The user's mask is memory-only and is cleared on refresh/close. */
 export const API_KEY_STORAGE_KEY = 'phantom_ai_groq_key'
+let activeApiKey: string | null = null
 
 /** Fired on `window` any time the stored key is set or cleared, so other
  * components (App shell, Settings) can react without prop drilling. */
@@ -25,11 +26,7 @@ function dispatchApiKeyChange(): void {
 }
 
 export function getStoredApiKey(): string | null {
-  try {
-    return localStorage.getItem(API_KEY_STORAGE_KEY)
-  } catch {
-    return null
-  }
+  return activeApiKey
 }
 
 export function hasApiKey(): boolean {
@@ -40,19 +37,13 @@ export function hasApiKey(): boolean {
 export function setStoredApiKey(key: string): void {
   const trimmed = key.trim()
   if (!trimmed) return
-  try {
-    localStorage.setItem(API_KEY_STORAGE_KEY, trimmed)
-  } finally {
-    dispatchApiKeyChange()
-  }
+  activeApiKey = trimmed
+  dispatchApiKeyChange()
 }
 
 export function clearStoredApiKey(): void {
-  try {
-    localStorage.removeItem(API_KEY_STORAGE_KEY)
-  } finally {
-    dispatchApiKeyChange()
-  }
+  activeApiKey = null
+  dispatchApiKeyChange()
 }
 
 export async function streamChatResponse(
