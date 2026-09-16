@@ -1,35 +1,25 @@
 import type { Handler } from "@netlify/functions";
 import {
   handleChatRequest,
-  type ChatRequestBody,
+  validateChatRequest,
 } from "../../shared/chatHandler.js";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-} as const;
-
 export const handler: Handler = async (event) => {
-  if (event.httpMethod === "OPTIONS") {
-    return {
-      statusCode: 204,
-      headers: corsHeaders,
-    };
-  }
-
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
-      headers: corsHeaders,
-      body: "Method Not Allowed",
+method cors      body: "Method Not Allowed",
     };
   }
 
   try {
-    const body: ChatRequestBody = JSON.parse(event.body || "{}");
-
-    const apiKey = body.apiKey?.trim() || process.env.GROQ_API_KEY || "";
+    if (!event.body || event.body.length > 80_000) {
+      return { statusCode: 413, body: JSON.stringify({ error: "Request is too large." }) };
+    }
+    const body = validateChatRequest(JSON.parse(event.body));
+    // This public endpoint is deliberately BYOK-only. Do not fall back to a
+    // deployment secret here: an unauthenticated endpoint would expose it to abuse.
+    const apiKey = body.apiKey!;
 
     const chunks: string[] = [];
 
@@ -51,7 +41,6 @@ export const handler: Handler = async (event) => {
     return {
       statusCode: 200,
       headers: {
-        ...corsHeaders,
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
       },
@@ -62,10 +51,7 @@ export const handler: Handler = async (event) => {
 
     return {
       statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({
-        error: err instanceof Error ? err.message : "Unknown server error",
-      }),
+      body: JSON.stringify({ error: "Invalid chat request." }),
     };
   }
 };
