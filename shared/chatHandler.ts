@@ -12,6 +12,34 @@ export interface ChatRequestBody {
   apiKey?: string;
 }
 
+const MAX_MESSAGES = 24;
+const MAX_MESSAGE_LENGTH = 6_000;
+const MAX_SYSTEM_PROMPT_LENGTH = 4_000;
+const MAX_API_KEY_LENGTH = 256;
+
+export function validateChatRequest(value: unknown): ChatRequestBody {
+  if (!value || typeof value !== "object") throw new Error("Invalid request body.");
+  const body = value as Partial<ChatRequestBody>;
+  if (!Array.isArray(body.messages) || body.messages.length === 0 || body.messages.length > MAX_MESSAGES) {
+    throw new Error("Invalid message list.");
+  }
+  if (typeof body.systemPrompt !== "string" || body.systemPrompt.length > MAX_SYSTEM_PROMPT_LENGTH) {
+    throw new Error("Invalid system prompt.");
+  }
+  if (typeof body.apiKey !== "string" || body.apiKey.trim().length === 0 || body.apiKey.length > MAX_API_KEY_LENGTH) {
+    throw new Error("A Groq API key is required.");
+  }
+  const messages: ChatMessage[] = body.messages.map((message) => {
+    if (!message || typeof message !== "object") throw new Error("Invalid message.");
+    const candidate = message as Partial<ChatMessage>;
+    if ((candidate.role !== "user" && candidate.role !== "assistant") || typeof candidate.content !== "string" || candidate.content.length === 0 || candidate.content.length > MAX_MESSAGE_LENGTH) {
+      throw new Error("Invalid message.");
+    }
+    return { role: candidate.role, content: candidate.content };
+  });
+  return { messages, systemPrompt: body.systemPrompt, apiKey: body.apiKey.trim() };
+}
+
 function sendSse(res: ServerResponse, data: Record<string, string>) {
   res.write(`data: ${JSON.stringify(data)}\n\n`);
 }
@@ -24,10 +52,8 @@ export async function handleChatRequest(
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
-  res.setHeader("Access-Control-Allow-Origin", "*");
-
-  if (!apiKey) {
-    sendSse(res, { error: "Missing GROQ_API_KEY in .env" });
+remove wildcard cors  if (!apiKey) {
+    sendSse(res, { error: "A Groq API key is required." });
     res.end();
     return;
   }
@@ -69,7 +95,7 @@ export async function handleChatRequest(
     console.error(err);
 
     sendSse(res, {
-      error: err instanceof Error ? err.message : "Unknown error",
+      error: "The chat service could not complete this request.",
     });
   } finally {
     res.end();
